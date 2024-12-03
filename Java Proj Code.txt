@@ -1,0 +1,117 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+class TrafficLightController {
+    private int greenLightDuration;  // in seconds
+    private int redLightDuration;    // in seconds
+    private int yellowLightDuration; // in seconds
+
+    public TrafficLightController(int green, int yellow, int red) {
+        this.greenLightDuration = green;
+        this.yellowLightDuration = yellow;
+        this.redLightDuration = red;
+    }
+
+    public void setGreenLightDuration(int duration) {
+        this.greenLightDuration = duration;
+    }
+
+    public int getGreenLightDuration() {
+        return greenLightDuration;
+    }
+
+    public int getYellowLightDuration() {
+        return yellowLightDuration;
+    }
+
+    public int getRedLightDuration() {
+        return redLightDuration;
+    }
+
+    public int calculateGreenLightDuration(int trafficVolume) {
+        // Adjusts the green light duration between 10 and 60 seconds
+        return Math.min(60, Math.max(10, trafficVolume / 2));
+    }
+}
+
+public class SmartTrafficManagementGUI {
+    private TrafficLightController controller;
+    private JFrame frame;
+    private JLabel trafficLabel, greenLabel, yellowLabel, redLabel;
+    private JTextField trafficInput;
+    private JButton simulateButton;
+
+    public SmartTrafficManagementGUI() {
+        // Initialize the traffic light controller
+        controller = new TrafficLightController(30, 5, 45);
+
+        // Set up the GUI
+        frame = new JFrame("Smart Traffic Management");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(400, 300);
+        frame.setLayout(new GridLayout(6, 1));
+
+        // Set background and foreground colors
+        frame.getContentPane().setBackground(Color.DARK_GRAY);
+
+        // Traffic input
+        trafficLabel = createLabel("Enter Traffic Volume (0 - 100 vehicles):", Color.WHITE);
+        trafficInput = new JTextField();
+        simulateButton = new JButton("Simulate Traffic");
+        simulateButton.setBackground(Color.BLUE);
+        simulateButton.setForeground(Color.WHITE);
+
+        // Light durations
+        greenLabel = createLabel("Green Light Duration: ", Color.GREEN);
+        yellowLabel = createLabel("Yellow Light Duration: " + controller.getYellowLightDuration() + " seconds", Color.ORANGE);
+        redLabel = createLabel("Red Light Duration: " + controller.getRedLightDuration() + " seconds", Color.RED);
+
+        // Add action listener for simulate button
+        simulateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                simulateTraffic();
+            }
+        });
+
+        // Add components to the frame
+        frame.add(trafficLabel);
+        frame.add(trafficInput);
+        frame.add(simulateButton);
+        frame.add(greenLabel);
+        frame.add(yellowLabel);
+        frame.add(redLabel);
+
+        frame.setVisible(true);
+    }
+
+    private JLabel createLabel(String text, Color color) {
+        JLabel label = new JLabel(text);
+        label.setForeground(color);
+        label.setHorizontalAlignment(SwingConstants.CENTER);
+        return label;
+    }
+
+    private void simulateTraffic() {
+        try {
+            int trafficVolume = Integer.parseInt(trafficInput.getText());
+            if (trafficVolume < 0 || trafficVolume > 100) {
+                JOptionPane.showMessageDialog(frame, "Traffic volume must be between 0 and 100.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            int adjustedGreenLight = controller.calculateGreenLightDuration(trafficVolume);
+            controller.setGreenLightDuration(adjustedGreenLight);
+
+            // Update labels with colors
+            greenLabel.setText("Green Light Duration: " + adjustedGreenLight + " seconds");
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(frame, "Please enter a valid number for traffic volume.", "Input Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(SmartTrafficManagementGUI::new);
+    }
+}
